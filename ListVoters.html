@@ -1,173 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.1/ethers.umd.min.js"
-        type="application/javascript"></script>
+  <head>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.1/ethers.umd.min.js"
+      type="application/javascript"
+    ></script>
     <script src="main.js"></script>
-	<title>Voting DAPP</title>
-	<style>
+    <title>Voting DAPP</title>
+    <style>
+     body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9fafb;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
 
-		button {
-			background-color: #4CAF50;
-			color: white;
-			padding: 12px 24px;
-			border: none;
-			border-radius: 4px;
-			cursor: pointer;
-			font-size: 16px;
-			font-weight: bold;
-			display: block;
-			margin: 50px auto 0;
-		}
+/* Navbar */
+.navbar {
+  overflow: hidden;
+  background-color: #222;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
 
-		button:hover {
-			background-color: #3e8e41;
-		}
+.navbar a {
+  color: white;
+  padding: 14px 24px;
+  text-decoration: none;
+  font-weight: 500;
+}
 
-		/* Paragraph styles */
-		p {
-			text-align: center;
-			font-size: 20px;
-			margin-top: 50px;
-		}
+.navbar a:hover {
+  background-color: #4caf50;
+}
 
+/* Center container */
+.container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 30px 40px;
+  margin: 40px auto;
+  max-width: 500px;
+  text-align: center;
+  transition: 0.3s;
+}
 
-		form {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			margin-top: 50px;
-		}
-		
-		input[type=text], select {
-			width: 100%;
-			padding: 12px 20px;
-			margin: 8px 0;
-			box-sizing: border-box;
-			border: 2px solid #ccc;
-			border-radius: 4px;
-		}
-		
-        input[type=number], select {
-			width: 30%;
-			padding: 12px 20px;
-			margin: 8px 0;
-			box-sizing: border-box;
-			border: 2px solid #ccc;
-			border-radius: 4px;
-		}
+.container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
 
-		input[type=submit] {
-			background-color: #4CAF50;
-			color: white;
-			padding: 12px 20px;
-			border: none;
-			border-radius: 4px;
-			cursor: pointer;
-		}
-		
-		input[type=submit]:hover {
-			background-color: #45a049;
-		}
-		
-		.container {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			margin-top: 50px;
-		}
-		
-		span {
-			display: block;
-			margin-bottom: 10px;
-		}
+.container span {
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #4caf50;
+}
 
-/* Style the navigation bar */
-		.navbar {
-			overflow: hidden;
-			background-color: #333;
-			font-family: Arial;
-		}
+/* Input fields */
+input[type="text"],
+input[type="number"] {
+  width: 90%;
+  padding: 12px 16px;
+  margin: 8px 0;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: 0.2s;
+}
 
-		/* Style the links inside the navigation bar */
-		.navbar a {
-			float: left;
-			display: block;
-			color: white;
-			text-align: center;
-			padding: 14px 20px;
-			text-decoration: none;
-		}
+input[type="text"]:focus,
+input[type="number"]:focus {
+  border-color: #4caf50;
+  outline: none;
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.4);
+}
 
-		/* Change the color of links on hover */
-		.navbar a:hover {
-			background-color: #ddd;
-			color: black;
-		}
+/* Buttons */
+button,
+input[type="submit"] {
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  transition: background-color 0.2s, transform 0.1s;
+}
 
-		
-        #myTable {
-        border-collapse: collapse;
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-        }
+button:hover,
+input[type="submit"]:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
 
-        #myTable th,
-        #myTable td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;
-        }
+/* Table */
+#myTable {
+  border-collapse: collapse;
+  width: 90%;
+  margin: 40px auto;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-        #myTable th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-        }
+#myTable th,
+#myTable td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
 
-	</style>
-</head>
-<body>
+#myTable th {
+  background-color: #4caf50;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#myTable tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Connect Metamask area */
+div > button:first-of-type {
+  margin: 30px auto 0;
+  display: block;
+}
+
+#metamasknotification,
+#transferStatus {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 500;
+}
+    </style>
+  </head>
+  <body>
     <div class="navbar">
-        <a href="index.html">Vote</a>
-        <a href="ListVoters.html">List Voters</a>
+      <a href="index.html">Vote</a>
+      <a href="ListVoters.html">List Voters</a>
     </div>
 
     <div>
-        <button onclick="connectMetamask()">Connect Metamask</button>
-        <p id="metamasknotification"></p>
+      <button onclick="connectMetamask()">Connect Metamask</button>
+      <p id="metamasknotification"></p>
     </div>
 
     <div class="container">
-        <form method="POST"  action="/addCandidate" enctype="multipart/form-data">
-            <span>Add candidate here</span>
-            <input type="text" name="vote" placeholder="Add name of the CandidateCandidate ...">
-            <input type="submit" value="Add Candidate">
-        </form>
+      <form method="POST" action="/addCandidate" enctype="multipart/form-data">
+        <span>Add candidate here</span>
+        <input
+          type="text"
+          name="vote"
+          placeholder="Add name of the CandidateCandidate ..."
+        />
+        <input type="submit" value="Add Candidate" />
+      </form>
+    </div>
+
+    <div class="container">
+        <span>Transfer Token</span>
+        <input
+          type="text"
+          id="tokenTransfer"
+          placeholder="Num Token"
+        />
+        <input
+          type="text"
+          id="walletAddress"
+          placeholder="Wallet Address"
+        />
+        <button onclick="transferToken()">Transfer</button>
+		<p id="transferStatus"></p>
     </div>
 
     <div>
-        <p id="votingStatus"></p>
+      <button onclick="getAllCandidates()">List All Candidates</button>
+      <p id="p3"></p>
     </div>
 
     <div>
-        <button onclick="getAllCandidates()">List All Candidates</button>
-        <p id="p3"></p>
+      <table id="myTable">
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Candidate Name</th>
+            <th>Candidate Votes</th>
+          </tr>
+        </thead>
+      </table>
     </div>
-
-    <div>
-        <table id="myTable">
-            <thead>
-                <tr>
-                   <th>Index</th>
-                   <th>Candidate Name</th>
-                   <th>Candidate Votes</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
-</body>
+  </body>
 </html>

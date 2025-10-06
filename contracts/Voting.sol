@@ -60,7 +60,7 @@
             // Người dùng phải approve token trước
             voteToken.transferFrom(msg.sender, address(this), tokenAmount);
 
-            candidates[_candidateIndex].voteCount += tokenAmount;
+            candidates[_candidateIndex].voteCount++;
             voters[msg.sender] = true;
         }
 
@@ -78,5 +78,9 @@
                 return 0;
             }
             return votingEnd - block.timestamp;
+        }
+
+        function getBalance() public view returns (uint256){
+            return voteToken.balanceOf(msg.sender);
         }
     }

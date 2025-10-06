@@ -33,23 +33,31 @@ app.get("/index.html", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 })
 
-app.post("/addCandidate", async(req, res) => {
-    var vote = req.body.vote;
-    console.log(vote);
-    async function storeDateInBlockchain(vote){
-        console.log("Adding the candidate in voting contract...");
-        const tx = await contractInstance.addCandidate(vote);
-        await tx.wait();
-    }
+app.post("/addCandidate", async (req, res) => {
+  try {
+    const vote = req.body.vote;
+    console.log("Candidate to add:", vote);
+
     const bool = await contractInstance.getVotingStatus();
-    if(bool == true){
-        await storeDateInBlockchain(vote);
-        res.send("The candidate has been registered in the smart contract")
+    if (!bool) {
+      return res.send("Voting is finished");
     }
-    else{
-        res.send("Voting is finished");
-    }
-})
+
+    console.log("Adding candidate in contract...");
+    const tx = await contractInstance.addCandidate(vote);
+    console.log("Transaction sent:", tx.hash);
+
+    const receipt = await tx.wait();
+    console.log("Transaction mined:", receipt.transactionHash);
+
+    res.send("Candidate successfully added to blockchain");
+  } catch (error) {
+    console.error("Error while adding candidate:", error);
+    res.status(500).send(`Error: ${error.reason || error.message}`);
+  } finally {
+    console.log("Done");
+  }
+});
 
 app.listen(port, () => {
     console.log("App is listening on port " + port);
