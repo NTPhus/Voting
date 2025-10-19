@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác minh sinh viên QNU</title>
+
+    <!-- Ethers.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.1/ethers.umd.min.js"></script>
+    <script src="main.js"></script>
+
+    <style>
+      * {
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        box-sizing: border-box;
+      }
+      body {
+        background: linear-gradient(135deg, #6b73ff, #000dff);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .card {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+      }
+      h2 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+      input {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.2s;
+      }
+      input:focus {
+        outline: none;
+        border-color: #000dff;
+        box-shadow: 0 0 5px rgba(0, 13, 255, 0.3);
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #000dff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background-color 0.2s, transform 0.1s;
+      }
+      button:hover {
+        background-color: #3843ff;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      #message {
+        margin-top: 15px;
+        font-weight: 500;
+        font-size: 15px;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 13px;
+        color: #777;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <h2>🎓 Xác minh sinh viên QNU để nhận Token</h2>
+
+      <form onsubmit="submitForm(event)">
+        <input id="fullName" placeholder="Họ và tên" required />
+        <input id="studentId" placeholder="Mã sinh viên" required />
+        <input
+          id="email"
+          placeholder="Email sinh viên (@st.qnu.edu.vn)"
+          type="email"
+          required
+        />
+        <input
+          id="walletAddress"
+          placeholder="Địa chỉ ví MetaMask"
+          required
+        />
+        <button type="submit">Xác minh & Nhận Token</button>
+      </form>
+
+      <p id="message"></p>
+      <p class="footer">© QNU Voting Token Portal</p>
+    </div>
+
+    <script>
+      async function submitForm(e) {
+        e.preventDefault();
+        const msgBox = document.getElementById("message");
+        msgBox.style.color = "black";
+        msgBox.textContent = "⏳ Đang xác minh sinh viên...";
+
+        const fullName = document.getElementById("fullName").value.trim();
+        const studentId = document.getElementById("studentId").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const walletAddress = document
+          .getElementById("walletAddress")
+          .value.trim();
+
+        try {
+          await verifyStudent({ fullName, studentId, email, walletAddress });
+          msgBox.style.color = "green";
+          msgBox.textContent = "✅ Xác minh thành công và token đã được mint!";
+          window.location.href = "/"
+        } catch (err) {
+          msgBox.style.color = "red";
+          msgBox.textContent = "❌ Lỗi: " + err.message;
+        }
+      }
+    </script>
+  </body>
+</html>

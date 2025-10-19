@@ -14,7 +14,7 @@ async function main() {
   const Voting = await hre.ethers.getContractFactory("Voting");
   const voting = await Voting.deploy(
     token.address,
-    ["Alice", "Bob", "Charlie"], // candidate list
+    ["Trang web bán quần áo tích hợp AI", "Trang web dự đoán nghề nghiệp dựa trên tính cách bằng AI", "Tìm kiếm văn bản theo ngữ nghĩa kết hợp RAG"], // candidate list
     10000 // thời gian (phút)
   );
   await voting.deployed();

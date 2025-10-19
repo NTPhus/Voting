@@ -1,12 +1,15 @@
 let WALLET_CONNECTED = "";
-let contractAddress = "0x0ad797E8C95E39b438A4Fd613dbC8213EEe1b3C5";
-const tokenAddress = "0xB67b505C692765006E6D04BdD26D17483ab3C0A1";
+let contractAddress = "0x113bc4db63dBB8f295cc22E057cff2018368D3D6";
+const tokenAddress = "0x337e499FA11fd0bc821098d0e49623033f51F5ef";
 const tokenAbi = [
   "function balanceOf(address owner) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function transfer(address to, uint256 amount) returns (bool)",
   "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+  "function claimToken(uint256 amount)",
+  "function mint(address to, uint256 amount)",
+  "function claimed(address user) view returns (bool)",
 ];
 
 let contractabi = [
@@ -95,19 +98,6 @@ let contractabi = [
   },
   {
     inputs: [],
-    name: "getBalance",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
     name: "getRemainingTime",
     outputs: [
       {
@@ -130,6 +120,37 @@ let contractabi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_durationInMinutes",
+        type: "uint256",
+      },
+    ],
+    name: "resetTime",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "transferToken",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -336,8 +357,166 @@ const transferToken = async () => {
     } else {
       transferStatus.innerHTML = "Get Error When Transfer";
     }
-  }else {
+  } else {
     const transferStatus = document.getElementById("transferStatus");
     transferStatus.innerHTML = "Please connect Metamask first";
+  }
+};
+
+const verifyStudent = async (formData) => {
+  const res = await fetch("/verify-student", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(formData),
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    alert(result.message);
+
+    // Gọi hàm mint token bằng ethers.js
+    await claimToken(result.data.tokenAmount);
+  } else {
+    alert(result.error);
+  }
+};
+
+const claimToken = async (amount) => {
+  try {
+    if (!window.ethereum) {
+      alert("Vui lòng cài đặt MetaMask!");
+      return;
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
+
+    const tx = await tokenContract.claimToken(amount);
+    await tx.wait();
+
+    alert("Nhận token thành công!\nTxHash: " + tx.hash);
+  } catch (err) {
+    console.error(err);
+    alert("Claim token thất bại: " + err.message);
+  }
+};
+
+const resetVotingTime = async () => {
+  try {
+    if (!window.ethereum) {
+      alert("⚠️ Vui lòng cài đặt MetaMask!");
+      return;
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    // ✅ Gọi đúng contract Voting (không phải Token)
+    const contractInstance = new ethers.Contract(
+      contractAddress,
+      contractabi,
+      signer
+    );
+
+    const duration = document.getElementById("durationMinutes").value;
+    if (!duration || duration <= 0) {
+      alert("Vui lòng nhập thời gian hợp lệ (tính bằng phút)");
+      return;
+    }
+
+    // ✅ Gọi hàm resetTime(uint256 _durationInMinutes)
+    const tx = await contractInstance.resetTime(duration);
+    document.getElementById("resetStatus").innerText =
+      "⏳ Đang reset thời gian voting...";
+    await tx.wait();
+
+    document.getElementById(
+      "resetStatus"
+    ).innerText = `✅ Reset thời gian voting thành công!
+Tx Hash: ${tx.hash}`;
+  } catch (err) {
+    console.error(err);
+    document.getElementById("resetStatus").innerText =
+      "❌ Reset thất bại: " + err.message;
+  }
+};
+
+// === Hiển thị danh sách ứng cử viên ===
+const loadCandidates = async () => {
+  try {
+    if (!window.ethereum) {
+      alert("⚠️ Vui lòng cài đặt MetaMask!");
+      return;
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    const contractInstance = new ethers.Contract(
+      contractAddress,
+      contractabi,
+      signer
+    );
+
+    let candidates = await contractInstance.getAllVotesOfCandidates();
+
+    const tbody = document.getElementById("candidatesBody");
+    tbody.innerHTML = "";
+    
+    for (let i = 0; i < candidates.length; i++) {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${i}</td>
+        <td>${candidates[i].name}</td>
+        <td>${candidates[i].voteCount}</td>
+        <td><button onclick="voteForCandidate(${i})">🗳️ Vote</button></td>
+      `;
+
+      tbody.appendChild(row);
+    }
+  } catch (err) {
+    console.error("Lỗi loadCandidates:", err);
+  }
+};
+
+// === Vote cho ứng cử viên ===
+const voteForCandidate = async (index) => {
+  try {
+    if (!window.ethereum) {
+      alert("⚠️ Vui lòng cài đặt MetaMask!");
+      return;
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    const contractInstance = new ethers.Contract(
+      contractAddress,
+      contractabi,
+      signer
+    );
+    
+    const amount = ethers.utils.parseUnits("1", 1);
+    const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, signer);
+    const approveTx = await tokenInstance.approve(contractAddress, amount);
+    await approveTx.wait();
+
+    const tx = await contractInstance.vote(index, amount);
+    await tx.wait();
+    document.getElementById("cand").innerText = "⏳ Đang gửi vote...";
+    await tx.wait();
+
+    document.getElementById(
+      "cand"
+    ).innerText = `✅ Vote thành công cho candidate #${index}`;
+    await loadCandidates(); // Cập nhật lại bảng sau khi vote
+  } catch (err) {
+    console.error(err);
+    document.getElementById("cand").innerText =
+      "❌ Vote thất bại ";
   }
 };

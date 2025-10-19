@@ -59,6 +59,44 @@ app.post("/addCandidate", async (req, res) => {
   }
 });
 
+app.post("/verify-student", async (req, res) => {
+  try {
+    const { fullName, studentId, email, walletAddress } = req.body;
+    const STUDENT_EMAIL_DOMAIN = "@st.qnu.edu.vn";
+
+    // ✅ 1. Kiểm tra đầu vào
+    if (!walletAddress || !ethers.utils.isAddress(walletAddress)) {
+      return res.status(400).json({ success: false, error: "Địa chỉ ví không hợp lệ" });
+    }
+
+    if (!email.endsWith(STUDENT_EMAIL_DOMAIN)) {
+      return res.status(400).json({ success: false, error: "Email không phải của sinh viên QNU" });
+    }
+
+    // ✅ 2. (Tùy chọn) kiểm tra trong DB
+    // const studentExists = await db.findStudent(studentId);
+    // if (!studentExists) return res.status(400).json({ success: false, error: "Không tìm thấy sinh viên" });
+
+    // ✅ 3. Gửi phản hồi cho frontend để xử lý mint
+    return res.json({
+      success: true,
+      message: "Xác minh thành công. Bạn đủ điều kiện nhận token!",
+      data: {
+        walletAddress,
+        fullName,
+        studentId,
+        email,
+        tokenAmount: "1", // thông tin để frontend mint
+      },
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: "Lỗi hệ thống: " + err.message });
+  }
+});
+
+
 app.listen(port, () => {
     console.log("App is listening on port " + port);
 })
