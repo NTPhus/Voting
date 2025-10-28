@@ -65,6 +65,10 @@ app.post("/verify-student", async (req, res) => {
     const STUDENT_EMAIL_DOMAIN = "@st.qnu.edu.vn";
 
     // ✅ 1. Kiểm tra đầu vào
+    if(studentId.length != 10){
+      return res.status(400).json({ success: false, error: "Mã sinh viên không hợp lệ" });
+    }
+    
     if (!walletAddress || !ethers.utils.isAddress(walletAddress)) {
       return res.status(400).json({ success: false, error: "Địa chỉ ví không hợp lệ" });
     }

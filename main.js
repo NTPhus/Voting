@@ -1,6 +1,7 @@
 let WALLET_CONNECTED = "";
-let contractAddress = "0x113bc4db63dBB8f295cc22E057cff2018368D3D6";
-const tokenAddress = "0x337e499FA11fd0bc821098d0e49623033f51F5ef";
+let contractAddress = "0xAb8D5692309139CF53C8c81511c8A1322378B8a7";
+const tokenAddress = "0x2f33044A4A800ba82fC0d497FB8e1b5e8cEeE1B9";
+const proposalId = 1;
 const tokenAbi = [
   "function balanceOf(address owner) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -13,223 +14,295 @@ const tokenAbi = [
 ];
 
 let contractabi = [
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_tokenAddress",
-        type: "address",
-      },
-      {
-        internalType: "string[]",
-        name: "_candidateNames",
-        type: "string[]",
-      },
-      {
-        internalType: "uint256",
-        name: "_durationInMinutes",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
-    ],
-    name: "addCandidate",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "candidates",
-    outputs: [
-      {
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "voteCount",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getAllVotesOfCandidates",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "string",
-            name: "name",
-            type: "string",
-          },
-          {
-            internalType: "uint256",
-            name: "voteCount",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct Voting.Candidate[]",
-        name: "",
-        type: "tuple[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getRemainingTime",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getVotingStatus",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_durationInMinutes",
-        type: "uint256",
-      },
-    ],
-    name: "resetTime",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "transferToken",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_candidateIndex",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenAmount",
-        type: "uint256",
-      },
-    ],
-    name: "vote",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "voteToken",
-    outputs: [
-      {
-        internalType: "contract IERC20",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "voters",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "votingEnd",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "votingStart",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_tokenAddress",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "proposalId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "startTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "endTime",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "voterCount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "maxVoters",
+          "type": "uint256"
+        }
+      ],
+      "name": "ProposalCreated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proposalId",
+          "type": "uint256"
+        }
+      ],
+      "name": "closeProposal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_title",
+          "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "_candidateNames",
+          "type": "string[]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_durationInMinutes",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_maxVoters",
+          "type": "uint256"
+        }
+      ],
+      "name": "createProposal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proposalId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAllVotesOfCandidates",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "voteCount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Voting.Candidate[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getProposalCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proposalId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getRemainingTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proposalId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getVotingStatus",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "proposalCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proposalId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_durationInMinutes",
+          "type": "uint256"
+        }
+      ],
+      "name": "resetTime",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proposalId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_candidateIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "vote",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "voteToken",
+      "outputs": [
+        {
+          "internalType": "contract IERC20",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ];
 
 const connectMetamask = async () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -252,7 +325,7 @@ const getAllCandidates = async () => {
   );
   p3.innerHTML =
     "Please wait, getting all the candidates from voting smart contract";
-  var candidates = await contractInstance.getAllVotesOfCandidates();
+  var candidates = await contractInstance.getAllVotesOfCandidates(proposalId);
   console.log(candidates);
   var table = document.getElementById("myTable");
   table.innerHTML = "";
@@ -283,44 +356,14 @@ const voteStatus = async () => {
       contractabi,
       signer
     );
-    const currentStatus = await contractInstance.getVotingStatus();
-    const time = await contractInstance.getRemainingTime();
+    const currentStatus = await contractInstance.getVotingStatus(proposalId);
+    const time = await contractInstance.getRemainingTime(proposalId);
     status.innerHTML =
       currentStatus == 1 ? "Voting is currenly open" : "Voting is finished";
     remainingTime.innerHTML = `Remain time is ${parseInt(time, 16)} seconds`;
   } else {
     var status = document.getElementById("status");
     status.innerHTML = "Please connect Metamask first";
-  }
-};
-
-const addVote = async () => {
-  if (WALLET_CONNECTED != 0) {
-    var name = document.getElementById("vote");
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const contractInstance = new ethers.Contract(
-      contractAddress,
-      contractabi,
-      signer
-    );
-    var cand = document.getElementById("cand");
-    cand.innerHTML = "Please wait, adding a vote in the smart contract";
-    const amount = ethers.utils.parseUnits("1", 1);
-
-    const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, signer);
-    const approveTx = await tokenInstance.approve(contractAddress, amount);
-    await approveTx.wait();
-
-    const tx = await contractInstance.vote(name.value, amount);
-    await tx.wait();
-
-    cand.innerHTML = "Vote added";
-    await getAllCandidates();
-  } else {
-    var cand = document.getElementById("cand");
-    cand.innerHTML = "Please connect Metamask first";
   }
 };
 
@@ -427,8 +470,7 @@ const resetVotingTime = async () => {
       return;
     }
 
-    // ✅ Gọi hàm resetTime(uint256 _durationInMinutes)
-    const tx = await contractInstance.resetTime(duration);
+    const tx = await contractInstance.resetTime(proposalId, duration);
     document.getElementById("resetStatus").innerText =
       "⏳ Đang reset thời gian voting...";
     await tx.wait();
@@ -444,7 +486,6 @@ Tx Hash: ${tx.hash}`;
   }
 };
 
-// === Hiển thị danh sách ứng cử viên ===
 const loadCandidates = async () => {
   try {
     if (!window.ethereum) {
@@ -461,7 +502,7 @@ const loadCandidates = async () => {
       signer
     );
 
-    let candidates = await contractInstance.getAllVotesOfCandidates();
+    let candidates = await contractInstance.getAllVotesOfCandidates(proposalId);
 
     const tbody = document.getElementById("candidatesBody");
     tbody.innerHTML = "";
@@ -483,7 +524,6 @@ const loadCandidates = async () => {
   }
 };
 
-// === Vote cho ứng cử viên ===
 const voteForCandidate = async (index) => {
   try {
     if (!window.ethereum) {
@@ -505,7 +545,7 @@ const voteForCandidate = async (index) => {
     const approveTx = await tokenInstance.approve(contractAddress, amount);
     await approveTx.wait();
 
-    const tx = await contractInstance.vote(index, amount);
+    const tx = await contractInstance.vote(proposalId, index, amount);
     await tx.wait();
     document.getElementById("cand").innerText = "⏳ Đang gửi vote...";
     await tx.wait();
