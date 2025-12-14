@@ -548,7 +548,6 @@ const voteForCandidate = async (index) => {
     const tx = await contractInstance.vote(proposalId, index, amount);
     await tx.wait();
     document.getElementById("cand").innerText = "⏳ Đang gửi vote...";
-    await tx.wait();
 
     document.getElementById(
       "cand"

@@ -11,12 +11,14 @@ app.use(express.static(__dirname));
 app.use(express.json());
 const path = require('path');
 const ethers = require('ethers');
+const mongoose = require("mongoose");
 
 var port = 3000;
 
 const API_URL = process.env.API_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const databaseURL = process.env.DATABASE_URL;
 
 const {abi} = require("./artifacts/contracts/Voting.sol/Voting.json");
 const provider = new ethers.providers.JsonRpcProvider(API_URL);
@@ -24,6 +26,60 @@ const provider = new ethers.providers.JsonRpcProvider(API_URL);
 const signer = new ethers.Wallet(PRIVATE_KEY, provider);
 
 const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+
+const studentSchema = new mongoose.Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    studentId: {
+      type: String,
+      required: true,
+      unique: true,
+      minlength: 10,
+      maxlength: 10,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/@st\.qnu\.edu\.vn$/, "Email không phải của sinh viên QNU"],
+    },
+    walletAddress: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
+
+    // số token được nhận (ở API đang set là "1")
+    tokenAmount: {
+      type: Number,
+      default: 1,
+    },
+
+    // trạng thái xác minh
+    isVerified: {
+      type: Boolean,
+      default: true, // hoặc false, tùy flow của bạn
+    },
+
+    // nếu sau này bạn lưu tx hash khi mint token on-chain
+    txHash: {
+      type: String,
+      default: null,
+    },
+  },
+  {
+    timestamps: true, // tự động có createdAt, updatedAt
+  }
+);
+
+const Student = mongoose.model("Student", studentSchema, "student");
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
@@ -47,8 +103,10 @@ app.post("/addCandidate", async (req, res) => {
     const tx = await contractInstance.addCandidate(vote);
     console.log("Transaction sent:", tx.hash);
 
-    const receipt = await tx.wait();
-    console.log("Transaction mined:", receipt.transactionHash);
+    // xử lý mined ở background
+    tx.wait().then(receipt => {
+      console.log("Transaction mined:", receipt.transactionHash);
+    }).catch(err => console.error("Error mining tx:", err));
 
     res.send("Candidate successfully added to blockchain");
   } catch (error) {
@@ -78,8 +136,8 @@ app.post("/verify-student", async (req, res) => {
     }
 
     // ✅ 2. (Tùy chọn) kiểm tra trong DB
-    // const studentExists = await db.findStudent(studentId);
-    // if (!studentExists) return res.status(400).json({ success: false, error: "Không tìm thấy sinh viên" });
+    const studentExists = await Student.findOne({ studentId: studentId, fullName: fullName, email: email });
+    if (!studentExists) return res.status(400).json({ success: false, error: "Không tìm thấy sinh viên" });
 
     // ✅ 3. Gửi phản hồi cho frontend để xử lý mint
     return res.json({
@@ -90,7 +148,7 @@ app.post("/verify-student", async (req, res) => {
         fullName,
         studentId,
         email,
-        tokenAmount: "1", // thông tin để frontend mint
+        tokenAmount: "1",
       },
     });
 
@@ -100,6 +158,13 @@ app.post("/verify-student", async (req, res) => {
   }
 });
 
+// ======================
+// 🔗 Kết nối MongoDB
+// ======================
+mongoose
+  .connect(databaseURL)
+  .then(() => console.log("✅ Database connected successfully"))
+  .catch((err) => console.error("❌ Database connection error:", err));
 
 app.listen(port, () => {
     console.log("App is listening on port " + port);
