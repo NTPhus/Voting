@@ -111,7 +111,7 @@
         e.preventDefault();
         const msgBox = document.getElementById("message");
         msgBox.style.color = "black";
-        msgBox.textContent = "⏳ Đang xác minh sinh viên...";
+        msgBox.textContent = "Đang xác minh sinh viên...";
 
         const fullName = document.getElementById("fullName").value.trim();
         const studentId = document.getElementById("studentId").value.trim();
@@ -123,11 +123,11 @@
         try {
           await verifyStudent({ fullName, studentId, email, walletAddress });
           msgBox.style.color = "green";
-          msgBox.textContent = "✅ Xác minh thành công và token đã được mint!";
+          msgBox.textContent = "Xác minh thành công và token đã được mint!";
           window.location.href = "/"
         } catch (err) {
           msgBox.style.color = "red";
-          msgBox.textContent = "❌ Lỗi: " + err.message;
+          msgBox.textContent = "Lỗi: " + err.message;
         }
       }
     </script>

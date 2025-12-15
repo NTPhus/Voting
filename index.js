@@ -122,7 +122,6 @@ app.post("/verify-student", async (req, res) => {
     const { fullName, studentId, email, walletAddress } = req.body;
     const STUDENT_EMAIL_DOMAIN = "@st.qnu.edu.vn";
 
-    // ✅ 1. Kiểm tra đầu vào
     if(studentId.length != 10){
       return res.status(400).json({ success: false, error: "Mã sinh viên không hợp lệ" });
     }
@@ -135,11 +134,9 @@ app.post("/verify-student", async (req, res) => {
       return res.status(400).json({ success: false, error: "Email không phải của sinh viên QNU" });
     }
 
-    // ✅ 2. (Tùy chọn) kiểm tra trong DB
     const studentExists = await Student.findOne({ studentId: studentId, fullName: fullName, email: email });
     if (!studentExists) return res.status(400).json({ success: false, error: "Không tìm thấy sinh viên" });
 
-    // ✅ 3. Gửi phản hồi cho frontend để xử lý mint
     return res.json({
       success: true,
       message: "Xác minh thành công. Bạn đủ điều kiện nhận token!",
@@ -158,9 +155,6 @@ app.post("/verify-student", async (req, res) => {
   }
 });
 
-// ======================
-// 🔗 Kết nối MongoDB
-// ======================
 mongoose
   .connect(databaseURL)
   .then(() => console.log("✅ Database connected successfully"))

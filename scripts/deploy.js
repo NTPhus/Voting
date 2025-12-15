@@ -4,19 +4,19 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
   console.log("🚀 Deploying contracts with:", deployer.address);
 
-  // 🪙 Deploy Token
+  // Deploy Token
   const Token = await hre.ethers.getContractFactory("VToken");
   const token = await Token.deploy(1000000); // Tổng cung 1,000,000 token
   await token.deployed();
   console.log("✅ Token deployed to:", token.address);
 
-  // 🗳️ Deploy Voting (phiên bản hỗ trợ nhiều proposal)
+  // Deploy Voting (phiên bản hỗ trợ nhiều proposal)
   const Voting = await hre.ethers.getContractFactory("Voting");
   const voting = await Voting.deploy(token.address);
   await voting.deployed();
   console.log("✅ Voting contract deployed to:", voting.address);
 
-  // 🧠 Tạo proposal đầu tiên ngay sau khi deploy
+  // Tạo proposal đầu tiên ngay sau khi deploy
   const tx = await voting.createProposal(
     "Lựa chọn đề tài dự án AI",
     [
@@ -32,14 +32,14 @@ async function main() {
 
    const receipt = await tx.wait();
 
-  // 📡 Lấy event từ logs
+  // Lấy event từ logs
   const event = receipt.events.find(e => e.event === "ProposalCreated");
   const proposalId = event.args.proposalId.toString();
 
-  console.log("✅ Proposal created successfully!");
-  console.log("🆔 Proposal ID:", proposalId);
-  console.log("📅 Start time:", event.args.startTime.toString());
-  console.log("⏳ End time:", event.args.endTime.toString());
+  console.log("Proposal created successfully!");
+  console.log("Proposal ID:", proposalId);
+  console.log("Start time:", event.args.startTime.toString());
+  console.log("End time:", event.args.endTime.toString());
 }
 
 main().catch((error) => {
