@@ -11,3 +11,9 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
+
+Lệnh khởi tạo project
+npx hardhat run scripts/deploy.js --network sepolia
+
+Lệnh khởi tạo phiên họp mới
+npx hardhat run scripts/createProposal.js --network sepolia

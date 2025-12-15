@@ -2,6 +2,7 @@ let WALLET_CONNECTED = "";
 let contractAddress = "0xAb8D5692309139CF53C8c81511c8A1322378B8a7";
 const tokenAddress = "0x2f33044A4A800ba82fC0d497FB8e1b5e8cEeE1B9";
 const proposalId = 1;
+//Hàm của ERC-20
 const tokenAbi = [
   "function balanceOf(address owner) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -13,6 +14,7 @@ const tokenAbi = [
   "function claimed(address user) view returns (bool)",
 ];
 
+//ABI
 let contractabi = [
     {
       "inputs": [
