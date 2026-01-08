@@ -12,6 +12,9 @@ npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
 
+lệnh dịch hợp đồng
+npx hardhat compile
+
 Lệnh khởi tạo project
 npx hardhat run scripts/deploy.js --network sepolia
 

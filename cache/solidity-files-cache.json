@@ -268,8 +268,8 @@
       ]
     },
     "D:\\LearnWeb\\Learn-Back-End\\Voting\\contracts\\Voting.sol": {
-      "lastModificationDate": 1761549748765,
-      "contentHash": "db11db32b785fb717acb280f2746c3ee",
+      "lastModificationDate": 1765804418374,
+      "contentHash": "44a14b9cca71fc85816a6a9126a342ce",
       "sourceName": "contracts/Voting.sol",
       "solcConfig": {
         "version": "0.8.28",

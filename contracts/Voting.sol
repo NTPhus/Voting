@@ -16,8 +16,8 @@ contract Voting {
         uint256 startTime;
         uint256 endTime;
         bool active;
-        uint256 voterCount; // 🆕 đếm số người đã vote
-        uint256 maxVoters;  // 🆕 giới hạn người vote
+        uint256 voterCount; //  đếm số người đã vote
+        uint256 maxVoters;  //  giới hạn người vote
     }
 
     IERC20 public voteToken;
