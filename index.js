@@ -139,8 +139,6 @@ app.post("/verify-student", async (req, res) => {
     const { fullName, studentId, email, walletAddress } = req.body;
     const STUDENT_EMAIL_DOMAIN = "@st.qnu.edu.vn";
 
-    console.log(req.body);
-    
     if(studentId.length != 10){
       return res.status(400).json({ success: false, error: "Mã sinh viên không hợp lệ" });
     }
