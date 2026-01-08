@@ -117,11 +117,30 @@ app.post("/addCandidate", async (req, res) => {
   }
 });
 
+// async function verifyStudent(payload) {
+//   const res = await fetch("http://localhost:3000/verify-student", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(payload),
+//   });
+
+//   const data = await res.json().catch(() => ({}));
+
+//   // Backend bạn trả {success:false,error} khi lỗi
+//   if (!res.ok || !data.success) {
+//     throw new Error(data.error || "Xác minh thất bại");
+//   }
+
+//   // Thành công: {success:true,message,data:{...}}
+//   return data;
+// }
 app.post("/verify-student", async (req, res) => {
   try {
     const { fullName, studentId, email, walletAddress } = req.body;
     const STUDENT_EMAIL_DOMAIN = "@st.qnu.edu.vn";
 
+    console.log(req.body);
+    
     if(studentId.length != 10){
       return res.status(400).json({ success: false, error: "Mã sinh viên không hợp lệ" });
     }
@@ -154,6 +173,13 @@ app.post("/verify-student", async (req, res) => {
     res.status(500).json({ success: false, error: "Lỗi hệ thống: " + err.message });
   }
 });
+
+
+
+// ======================
+// 🔗 Kết nối MongoDB
+// ======================
+=======
 
 mongoose
   .connect(databaseURL)
