@@ -100,14 +100,23 @@ contract Voting {
     }
 
     function getAllVotesOfCandidates(uint256 _proposalId)
-        public
-        view
-        validProposal(_proposalId)
+    public
+    view
+    validProposal(_proposalId)
         returns (Candidate[] memory)
     {
         Proposal storage p = proposals[_proposalId];
-        return p.candidates;
+
+        uint256 len = p.candidates.length;
+        Candidate[] memory result = new Candidate[](len);
+
+        for (uint256 i = 0; i < len; i++) {
+            result[i] = p.candidates[i];
+        }
+
+        return result;
     }
+
 
     function getVotingStatus(uint256 _proposalId)
         public

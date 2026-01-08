@@ -117,6 +117,23 @@ app.post("/addCandidate", async (req, res) => {
   }
 });
 
+// async function verifyStudent(payload) {
+//   const res = await fetch("http://localhost:3000/verify-student", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(payload),
+//   });
+
+//   const data = await res.json().catch(() => ({}));
+
+//   // Backend bạn trả {success:false,error} khi lỗi
+//   if (!res.ok || !data.success) {
+//     throw new Error(data.error || "Xác minh thất bại");
+//   }
+
+//   // Thành công: {success:true,message,data:{...}}
+//   return data;
+// }
 app.post("/verify-student", async (req, res) => {
   try {
     const { fullName, studentId, email, walletAddress } = req.body;
@@ -155,6 +172,10 @@ app.post("/verify-student", async (req, res) => {
   }
 });
 
+
+// ======================
+// 🔗 Kết nối MongoDB
+// ======================
 mongoose
   .connect(databaseURL)
   .then(() => console.log("✅ Database connected successfully"))
