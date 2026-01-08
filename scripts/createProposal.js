@@ -3,9 +3,8 @@ const hre = require("hardhat");
 async function main() {
   const [owner] = await hre.ethers.getSigners();
 
-  // 🔗 Gắn vào contract đã deploy
   const Voting = await hre.ethers.getContractFactory("Voting");
-  const voting = await Voting.attach("0x19405Fed3727736540e84c6aC634C97781299dD5"); // 👈 thay bằng địa chỉ thật
+  const voting = await Voting.attach("0x19405Fed3727736540e84c6aC634C97781299dD5"); 
 
   console.log("Creating new proposal...");
 
@@ -18,7 +17,6 @@ async function main() {
 
   const receipt = await tx.wait();
 
-  // 📡 Bắt event từ log
   const event = receipt.events.find(e => e.event === "ProposalCreated");
   const proposalId = event.args.proposalId.toString();
 

@@ -2,6 +2,7 @@ let WALLET_CONNECTED = "";
 let contractAddress = "0x32141172c319901f7fD15fB8ae0dc206A323e5d4";
 const tokenAddress = "0xa2c69C802E4121cc0e728c50dE376358eca03fe7";
 const proposalId = 1;
+//Hàm của ERC-20
 const tokenAbi = [
   "function balanceOf(address owner) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -456,14 +457,13 @@ const claimToken = async (amount) => {
 const resetVotingTime = async () => {
   try {
     if (!window.ethereum) {
-      alert("⚠️ Vui lòng cài đặt MetaMask!");
+      alert("Vui lòng cài đặt MetaMask!");
       return;
     }
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
-    // ✅ Gọi đúng contract Voting (không phải Token)
     const contractInstance = new ethers.Contract(
       contractAddress,
       contractabi,
@@ -478,24 +478,24 @@ const resetVotingTime = async () => {
 
     const tx = await contractInstance.resetTime(proposalId, duration);
     document.getElementById("resetStatus").innerText =
-      "⏳ Đang reset thời gian voting...";
+      "Đang reset thời gian voting...";
     await tx.wait();
 
     document.getElementById(
       "resetStatus"
-    ).innerText = `✅ Reset thời gian voting thành công!
+    ).innerText = `Reset thời gian voting thành công!
 Tx Hash: ${tx.hash}`;
   } catch (err) {
     console.error(err);
     document.getElementById("resetStatus").innerText =
-      "❌ Reset thất bại: " + err.message;
+      "Reset thất bại: " + err.message;
   }
 };
 
 const loadCandidates = async () => {
   try {
     if (!window.ethereum) {
-      alert("⚠️ Vui lòng cài đặt MetaMask!");
+      alert("Vui lòng cài đặt MetaMask!");
       return;
     }
 
@@ -537,7 +537,7 @@ console.log("Network:", network);
 const voteForCandidate = async (index) => {
   try {
     if (!window.ethereum) {
-      alert("⚠️ Vui lòng cài đặt MetaMask!");
+      alert("Vui lòng cài đặt MetaMask!");
       return;
     }
 
@@ -561,11 +561,11 @@ const voteForCandidate = async (index) => {
 
     document.getElementById(
       "cand"
-    ).innerText = `✅ Vote thành công cho candidate #${index}`;
+    ).innerText = `Vote thành công cho candidate #${index}`;
     await loadCandidates(); // Cập nhật lại bảng sau khi vote
   } catch (err) {
     console.error(err);
     document.getElementById("cand").innerText =
-      "❌ Vote thất bại ";
+      "Vote thất bại ";
   }
 };
