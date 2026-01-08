@@ -1,6 +1,6 @@
 let WALLET_CONNECTED = "";
-let contractAddress = "0xAb8D5692309139CF53C8c81511c8A1322378B8a7";
-const tokenAddress = "0x2f33044A4A800ba82fC0d497FB8e1b5e8cEeE1B9";
+let contractAddress = "0x32141172c319901f7fD15fB8ae0dc206A323e5d4";
+const tokenAddress = "0xa2c69C802E4121cc0e728c50dE376358eca03fe7";
 const proposalId = 1;
 //Hàm của ERC-20
 const tokenAbi = [
@@ -306,6 +306,7 @@ let contractabi = [
     }
   ];
 
+
 const connectMetamask = async () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
@@ -320,11 +321,13 @@ const getAllCandidates = async () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
   const signer = provider.getSigner();
+
   const contractInstance = new ethers.Contract(
     contractAddress,
     contractabi,
     signer
   );
+  
   p3.innerHTML =
     "Please wait, getting all the candidates from voting smart contract";
   var candidates = await contractInstance.getAllVotesOfCandidates(proposalId);
@@ -408,24 +411,27 @@ const transferToken = async () => {
   }
 };
 
-const verifyStudent = async (formData) => {
-  const res = await fetch("/verify-student", {
+async function verifyStudent(formData) {
+  const url = "/verify-student";
+
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(formData),
   });
 
-  const result = await res.json();
+  const data = await res.json().catch(() => null);
+  
 
-  if (result.success) {
-    alert(result.message);
+  if (!data) throw new Error("Server không trả JSON hợp lệ");
 
-    // Gọi hàm mint token bằng ethers.js
-    await claimToken(result.data.tokenAmount);
-  } else {
-    alert(result.error);
+  if (!res.ok || data.success !== true) {
+    throw new Error(data.error || "Xác minh thất bại");
   }
-};
+
+  return data; // ✅ để submitForm dùng Swal hiển thị
+}
+
 
 const claimToken = async (amount) => {
   try {
@@ -497,12 +503,16 @@ const loadCandidates = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
+  
+const network = await provider.getNetwork();
+console.log("Network:", network);
+
     const contractInstance = new ethers.Contract(
       contractAddress,
       contractabi,
       signer
     );
-
+  
     let candidates = await contractInstance.getAllVotesOfCandidates(proposalId);
 
     const tbody = document.getElementById("candidatesBody");
