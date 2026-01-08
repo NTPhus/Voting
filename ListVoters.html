@@ -16,7 +16,7 @@
       rel="stylesheet"
     />
 
-    <style>
+    <!-- <style>
       body {
         font-family: "Poppins", sans-serif;
         margin: 0;
@@ -208,6 +208,184 @@
           gap: 20px;
         }
       }
+    </style> -->
+     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(-45deg, #1e003a, #37006b, #00346b, #00b8a9);
+        background-size: 400% 400%;
+        animation: gradientMove 10s ease infinite;
+        color: #f5f5f5;
+      }
+
+      @keyframes gradientMove {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .navbar {
+        background: rgba(0, 0, 0, 0.25);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+        padding: 16px 0;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .navbar a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 17px;
+        transition: all 0.25s ease;
+      }
+
+      .navbar a:hover {
+        color: #8ae8ff;
+        text-shadow: 0 0 8px #00fff0;
+        transform: translateY(-2px);
+      }
+
+      .navbar .title {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 600;
+        margin-left: 40px;
+        text-shadow: 0 0 10px #ff00ff;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 16px;
+        padding: 36px 40px;
+        margin: 40px auto;
+        max-width: 600px;
+        text-align: center;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .container span {
+        display: block;
+        font-size: 22px;
+        font-weight: 600;
+        color: #80ffea;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px #00ffd5;
+      }
+
+      button {
+        background: linear-gradient(135deg, #00fff0, #00b0ff, #ff00ff);
+        background-size: 300% 300%;
+        animation: pulse 4s ease infinite;
+        color: #fff;
+        padding: 8px 18px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+        letter-spacing: 0.5px;
+        margin-top: 10px;
+      }
+
+      @keyframes pulse {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 20px #00fff0, 0 0 30px #ff00ff;
+      }
+
+      #candidatesTable {
+        width: 100%;
+        border-collapse: collapse;
+        color: #fff;
+      }
+
+      #candidatesTable th {
+        background: linear-gradient(90deg, #00bcd4, #8e24aa);
+        padding: 10px;
+      }
+
+      #candidatesTable td {
+        padding: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      #candidatesTable tr:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      p {
+        margin-top: 12px;
+      }
+            #metamasknotification,
+      #transferStatus {
+        text-align: center;
+        margin-top: 10px;
+        font-weight: 500;
+        color: #00ffc6;
+      }
+
+      /* ===== Center Metamask button ===== */
+      .center {
+        text-align: center;
+        margin-top: 30px;
+      }
+
+      /* ===== Inputs ===== */
+      input[type="text"],
+      input[type="number"] {
+        width: 85%;
+        padding: 12px 14px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        outline: none;
+        transition: 0.3s ease;
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus {
+        box-shadow: 0 0 8px #00ffc6;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      input::placeholder {
+        color: #ccc;
+      }
     </style>
   </head>
 
@@ -215,7 +393,7 @@
     <div class="navbar">
       <a href="index.html">🗳️ Vote</a>
       <a href="ListVoters.html">📋 List Voters</a>
-      <a href="VerifyStudent.html">Verify Student</a>
+      <!-- <a href="VerifyStudent.html">Verify Student</a> -->
     </div>
 
     <div class="wrapper">
@@ -230,13 +408,13 @@
           action="/addCandidate"
           enctype="multipart/form-data"
         >
-          <span>➕ Add Candidate</span>
+          <span>➕ Thêm sản phẩm</span>
           <input
             type="text"
             name="vote"
-            placeholder="Enter candidate name..."
+            placeholder="Nhập tên sản phẩm..."
           />
-          <input type="submit" value="Add Candidate" />
+          <button>Thêm</button>
         </form>
       </div>
 
@@ -253,19 +431,19 @@
       </div>
 
       <div class="container">
-        <span>⏰ Reset Voting Time</span>
+        <span>⏰ Reset thời gian Voting</span>
         <input
           type="number"
           id="durationMinutes"
-          placeholder="Enter new duration (minutes)"
+          placeholder="Nhập thời gian(phút)...."
         />
-        <button onclick="resetVotingTime()">Reset Time</button>
+        <button onclick="resetVotingTime()">Reset</button>
         <p id="resetStatus"></p>
       </div>
 
       <div class="container">
-        <span>📋 List Candidates</span>
-        <button onclick="getAllCandidates()">Show All</button>
+        <span>📋 Danh sách sản phẩm</span>
+        <button onclick="getAllCandidates()">Xem</button>
         <p id="p3"></p>
       </div>
 
