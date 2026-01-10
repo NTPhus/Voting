@@ -120,6 +120,46 @@ contract Voting {
         p.voterCount++;
     }
 
+    function addCandidate(
+        uint256 _proposalId,
+        string memory _candidateName
+    ) public onlyOwner validProposal(_proposalId) {
+        Proposal storage p = proposals[_proposalId];
+
+        require(p.active, "Proposal is closed");
+        require(bytes(_candidateName).length > 0, "Candidate name required");
+
+        p.candidates.push(Candidate({name: _candidateName, voteCount: 0}));
+    }
+
+    function getWinner(
+        uint256 _proposalId
+    )
+        public
+        view
+        validProposal(_proposalId)
+        returns (
+            string memory winnerName,
+            uint256 winnerVoteCount,
+            uint256 winnerIndex
+        )
+    {
+        Proposal storage p = proposals[_proposalId];
+        require(p.candidates.length > 0, "No candidates");
+
+        uint256 maxVotes = 0;
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < p.candidates.length; i++) {
+            if (p.candidates[i].voteCount > maxVotes) {
+                maxVotes = p.candidates[i].voteCount;
+                index = i;
+            }
+        }
+
+        return (p.candidates[index].name, p.candidates[index].voteCount, index);
+    }
+
     function getVoters(
         uint256 _proposalId
     )

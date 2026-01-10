@@ -54,6 +54,14 @@
       <p id="cand"></p>
     </div>
 
+    <div style="text-align: center; margin-top: 20px">
+      <button id="winnerBtn" onclick="getWinner()" style="display: none">
+        🏆 Xem kết quả thắng cuộc
+      </button>
+
+      <p id="winnerResult"></p>
+    </div>
+
     <div class="container fadeIn">
       <span>💰 Kiểm tra số dư</span>
       <button onclick="getBalance()">Kiểm tra</button>
@@ -140,8 +148,9 @@
             walletAddress,
           });
           console.log(result);
-          
-          document.getElementById("verify-btn").innerHTML = "Xác minh thành công!";
+
+          document.getElementById("verify-btn").innerHTML =
+            "Xác minh thành công!";
           // Thành công
           await Swal.fire({
             icon: "success",

@@ -92,15 +92,16 @@ app.get("/index.html", (req, res) => {
 app.post("/addCandidate", async (req, res) => {
   try {
     const vote = req.body.vote;
+    const proposalId = 1;
     console.log("Candidate to add:", vote);
 
-    const bool = await contractInstance.getVotingStatus();
+    const bool = await contractInstance.getVotingStatus(proposalId);
     if (!bool) {
       return res.send("Voting is finished");
     }
-
+    console.log(bool);
     console.log("Adding candidate in contract...");
-    const tx = await contractInstance.addCandidate(vote);
+    const tx = await contractInstance.addCandidate(proposalId,vote);
     console.log("Transaction sent:", tx.hash);
 
     // xử lý mined ở background
@@ -108,7 +109,7 @@ app.post("/addCandidate", async (req, res) => {
       console.log("Transaction mined:", receipt.transactionHash);
     }).catch(err => console.error("Error mining tx:", err));
 
-    res.send("Candidate successfully added to blockchain");
+    res.redirect("/");
   } catch (error) {
     console.error("Error while adding candidate:", error);
     res.status(500).send(`Error: ${error.reason || error.message}`);
