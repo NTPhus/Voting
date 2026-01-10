@@ -314,3 +314,8 @@ p {
   font-style: italic;
   /* text-shadow: 0 0 8px #00fff0; */
 }
+
+.hidden {
+    display: none;
+}
+

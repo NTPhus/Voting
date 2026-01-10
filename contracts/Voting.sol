@@ -13,11 +13,14 @@ contract Voting {
         string title;
         Candidate[] candidates;
         mapping(address => bool) voters;
+        mapping(address => uint256) votedCandidate;
+        mapping(address => uint256) votedAmount;
+        address[] voterList;
         uint256 startTime;
         uint256 endTime;
         bool active;
-        uint256 voterCount; //  đếm số người đã vote
-        uint256 maxVoters;  //  giới hạn người vote
+        uint256 voterCount;
+        uint256 maxVoters;
     }
 
     IERC20 public voteToken;
@@ -45,7 +48,10 @@ contract Voting {
     }
 
     modifier validProposal(uint256 _proposalId) {
-        require(_proposalId > 0 && _proposalId <= proposalCount, "Invalid proposal");
+        require(
+            _proposalId > 0 && _proposalId <= proposalCount,
+            "Invalid proposal"
+        );
         _;
     }
 
@@ -66,7 +72,9 @@ contract Voting {
         p.voterCount = 0;
 
         for (uint256 i = 0; i < _candidateNames.length; i++) {
-            p.candidates.push(Candidate({name: _candidateNames[i], voteCount: 0}));
+            p.candidates.push(
+                Candidate({name: _candidateNames[i], voteCount: 0})
+            );
         }
 
         emit ProposalCreated(
@@ -80,31 +88,66 @@ contract Voting {
     }
 
     // 🗳️ Bỏ phiếu bằng token ERC20
-    function vote(uint256 _proposalId, uint256 _candidateIndex, uint256 tokenAmount)
-        public
-        validProposal(_proposalId)
-    {
+    function vote(
+        uint256 _proposalId,
+        uint256 _candidateIndex,
+        uint256 tokenAmount
+    ) public validProposal(_proposalId) {
         Proposal storage p = proposals[_proposalId];
+
         require(p.active, "Voting closed");
-        require(block.timestamp >= p.startTime && block.timestamp < p.endTime, "Voting not active");
-        require(!p.voters[msg.sender], "You have already voted!");
-        require(p.voterCount < p.maxVoters, "Voting limit reached!");
-        require(_candidateIndex < p.candidates.length, "Invalid candidate index");
+        require(
+            block.timestamp >= p.startTime && block.timestamp < p.endTime,
+            "Voting not active"
+        );
+        require(!p.voters[msg.sender], "You have already voted");
+        require(p.voterCount < p.maxVoters, "Voting limit reached");
+        require(_candidateIndex < p.candidates.length, "Invalid candidate");
         require(tokenAmount > 0, "Must vote with tokens");
-        require(voteToken.balanceOf(msg.sender) >= tokenAmount, "Not enough tokens");
+        require(
+            voteToken.balanceOf(msg.sender) >= tokenAmount,
+            "Not enough tokens"
+        );
 
         voteToken.transferFrom(msg.sender, address(this), tokenAmount);
-        p.candidates[_candidateIndex].voteCount += tokenAmount;
+
         p.voters[msg.sender] = true;
+        p.votedCandidate[msg.sender] = _candidateIndex;
+        p.votedAmount[msg.sender] = tokenAmount;
+        p.voterList.push(msg.sender);
+
+        p.candidates[_candidateIndex].voteCount += tokenAmount;
         p.voterCount++;
     }
 
-    function getAllVotesOfCandidates(uint256 _proposalId)
-    public
-    view
-    validProposal(_proposalId)
-        returns (Candidate[] memory)
+    function getVoters(
+        uint256 _proposalId
+    )
+        public
+        view
+        validProposal(_proposalId)
+        returns (address[] memory, uint256[] memory, uint256[] memory)
     {
+        Proposal storage p = proposals[_proposalId];
+        uint256 len = p.voterList.length;
+
+        address[] memory voters = new address[](len);
+        uint256[] memory candidates = new uint256[](len);
+        uint256[] memory amounts = new uint256[](len);
+
+        for (uint256 i = 0; i < len; i++) {
+            address voter = p.voterList[i];
+            voters[i] = voter;
+            candidates[i] = p.votedCandidate[voter];
+            amounts[i] = p.votedAmount[voter];
+        }
+
+        return (voters, candidates, amounts);
+    }
+
+    function getAllVotesOfCandidates(
+        uint256 _proposalId
+    ) public view validProposal(_proposalId) returns (Candidate[] memory) {
         Proposal storage p = proposals[_proposalId];
 
         uint256 len = p.candidates.length;
@@ -117,23 +160,18 @@ contract Voting {
         return result;
     }
 
-
-    function getVotingStatus(uint256 _proposalId)
-        public
-        view
-        validProposal(_proposalId)
-        returns (bool)
-    {
+    function getVotingStatus(
+        uint256 _proposalId
+    ) public view validProposal(_proposalId) returns (bool) {
         Proposal storage p = proposals[_proposalId];
-        return (block.timestamp >= p.startTime && block.timestamp < p.endTime && p.active);
+        return (block.timestamp >= p.startTime &&
+            block.timestamp < p.endTime &&
+            p.active);
     }
 
-    function getRemainingTime(uint256 _proposalId)
-        public
-        view
-        validProposal(_proposalId)
-        returns (uint256)
-    {
+    function getRemainingTime(
+        uint256 _proposalId
+    ) public view validProposal(_proposalId) returns (uint256) {
         Proposal storage p = proposals[_proposalId];
         if (block.timestamp >= p.endTime) {
             return 0;
@@ -141,22 +179,19 @@ contract Voting {
         return p.endTime - block.timestamp;
     }
 
-    function resetTime(uint256 _proposalId, uint256 _durationInMinutes)
-        public
-        onlyOwner
-        validProposal(_proposalId)
-    {
+    function resetTime(
+        uint256 _proposalId,
+        uint256 _durationInMinutes
+    ) public onlyOwner validProposal(_proposalId) {
         Proposal storage p = proposals[_proposalId];
         p.startTime = block.timestamp;
         p.endTime = block.timestamp + (_durationInMinutes * 1 minutes);
         p.active = true;
     }
 
-    function closeProposal(uint256 _proposalId)
-        public
-        onlyOwner
-        validProposal(_proposalId)
-    {
+    function closeProposal(
+        uint256 _proposalId
+    ) public onlyOwner validProposal(_proposalId) {
         Proposal storage p = proposals[_proposalId];
         require(p.active, "Already closed");
         p.active = false;

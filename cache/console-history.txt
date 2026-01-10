@@ -1,0 +1,5 @@
+quit
+exit
+exity
+que
+const contract = await ethers.getContractAt("Voting", ADDRESS)

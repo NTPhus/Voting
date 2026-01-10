@@ -117,23 +117,39 @@ app.post("/addCandidate", async (req, res) => {
   }
 });
 
-// async function verifyStudent(payload) {
-//   const res = await fetch("http://localhost:3000/verify-student", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(payload),
-//   });
+app.post("/import-student", async (req, res) => {
+  try {
+    const { importedStudents } = req.body;
 
-//   const data = await res.json().catch(() => ({}));
+    const students = importedStudents
 
-//   // Backend bạn trả {success:false,error} khi lỗi
-//   if (!res.ok || !data.success) {
-//     throw new Error(data.error || "Xác minh thất bại");
-//   }
+    if (!Array.isArray(students) || students.length === 0) {
+      return res.status(400).json({ message: "Danh sách student rỗng" });
+    }
 
-//   // Thành công: {success:true,message,data:{...}}
-//   return data;
-// }
+    // validate
+    for (const s of students) {
+      if (!s.fullName || !s.studentId || !s.email || !s.walletAddress) {
+        return res.status(400).json({ message: "Dữ liệu không hợp lệ" });
+      }
+    }
+
+    await Student.insertMany(students);
+
+    console.log("Import students:", students.length);
+
+    res.json({
+      message: "Import thành công",
+      count: students.length,
+      students // trả lại để render
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 app.post("/verify-student", async (req, res) => {
   try {
     const { fullName, studentId, email, walletAddress } = req.body;
@@ -162,7 +178,7 @@ app.post("/verify-student", async (req, res) => {
         fullName,
         studentId,
         email,
-        tokenAmount: "1",
+        tokenAmount: 1,
       },
     });
 

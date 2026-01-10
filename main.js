@@ -1,6 +1,7 @@
 let WALLET_CONNECTED = "";
-let contractAddress = "0x32141172c319901f7fD15fB8ae0dc206A323e5d4";
-const tokenAddress = "0xa2c69C802E4121cc0e728c50dE376358eca03fe7";
+let contractAddress = "0xd49000131E0FE5d21a1ae8BB0f7eA144Ebf44534";
+const tokenAddress = "0xf6c24F5C1ac656800c33AD14005f25dF72A2Cc8E";
+const owner = "0xD93c7fBF96f534bbE15C80c4677D57a6783b8F18";
 const proposalId = 1;
 //Hàm của ERC-20
 const tokenAbi = [
@@ -182,6 +183,35 @@ let contractabi = [
           "type": "uint256"
         }
       ],
+      "name": "getVoters",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_proposalId",
+          "type": "uint256"
+        }
+      ],
       "name": "getVotingStatus",
       "outputs": [
         {
@@ -306,7 +336,6 @@ let contractabi = [
     }
   ];
 
-
 const connectMetamask = async () => {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
@@ -314,6 +343,10 @@ const connectMetamask = async () => {
   WALLET_CONNECTED = await signer.getAddress();
   var element = document.getElementById("metamasknotification");
   element.innerHTML = "Metamask is connected " + WALLET_CONNECTED;
+  if(WALLET_CONNECTED == owner){
+    const adminLink = document.getElementById("admin");
+    adminLink.classList.remove("hidden");
+  }
 };
 
 const getAllCandidates = async () => {
@@ -327,7 +360,7 @@ const getAllCandidates = async () => {
     contractabi,
     signer
   );
-  
+
   p3.innerHTML =
     "Please wait, getting all the candidates from voting smart contract";
   var candidates = await contractInstance.getAllVotesOfCandidates(proposalId);
@@ -350,28 +383,36 @@ const getAllCandidates = async () => {
 };
 
 const voteStatus = async () => {
-  if (WALLET_CONNECTED != 0) {
-    var status = document.getElementById("status");
-    var remainingTime = document.getElementById("time");
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const contractInstance = new ethers.Contract(
-      contractAddress,
-      contractabi,
-      signer
-    );
-    const currentStatus = await contractInstance.getVotingStatus(proposalId);
-    const time = await contractInstance.getRemainingTime(proposalId);
-    status.innerHTML =
-      currentStatus == 1 ? "Voting is currenly open" : "Voting is finished";
-    remainingTime.innerHTML = `Remain time is ${parseInt(time, 16)} seconds`;
-  } else {
-    var status = document.getElementById("status");
-    status.innerHTML = "Please connect Metamask first";
-  }
-};
+  var remainingTime = document.getElementById("time");
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  const signer = provider.getSigner();
+  const contractInstance = new ethers.Contract(
+    contractAddress,
+    contractabi,
+    signer
+  );
+  const time = await contractInstance.getRemainingTime(proposalId);
+  // remainingTime.innerHTML = `Thời gian kết thúc bầu chọn: ${parseInt(time, 16)}`
+  let remaining = time.toNumber();
 
+  const interval = setInterval(() => {
+    if (remaining <= 0) {
+      remainingTime.innerHTML = "Bầu chọn đã kết thúc";
+      clearInterval(interval);
+      return;
+    }
+
+    const days = Math.floor(remaining / 86400);
+    const hours = Math.floor((remaining % 86400) / 3600);
+    const minutes = Math.floor((remaining % 3600) / 60);
+    const seconds = remaining % 60;
+
+    remainingTime.innerHTML = `Thời gian kết thúc bầu chọn: ${days} ngày ${hours} giờ ${minutes} phút ${seconds} giây`;
+
+    remaining--;
+  }, 1000);
+};
 const getBalance = async () => {
   if (WALLET_CONNECTED != 0) {
     const balance = document.getElementById("balance");
@@ -398,7 +439,6 @@ const transferToken = async () => {
     transferStatus.innerHTML = "Please wait for transfer process";
     const numToken = document.getElementById("tokenTransfer").value;
     const walletAddress = document.getElementById("walletAddress").value;
-    console.log(walletAddress, numToken);
     const transfer = await tokenInstance.transfer(walletAddress, numToken);
     if (transfer) {
       transferStatus.innerHTML = "Transfer Successfull";
@@ -421,7 +461,6 @@ async function verifyStudent(formData) {
   });
 
   const data = await res.json().catch(() => null);
-  
 
   if (!data) throw new Error("Server không trả JSON hợp lệ");
 
@@ -429,9 +468,13 @@ async function verifyStudent(formData) {
     throw new Error(data.error || "Xác minh thất bại");
   }
 
+  claimToken(1);
+
+  document.getElementById("verify-btn").innerHTML = "Xác minh thành công!";
+  document.getElementById("verify-btn").setAttribute("disabled", "");
+
   return data; // ✅ để submitForm dùng Swal hiển thị
 }
-
 
 const claimToken = async (amount) => {
   try {
@@ -503,21 +546,21 @@ const loadCandidates = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
-  
-const network = await provider.getNetwork();
-console.log("Network:", network);
+
+    const network = await provider.getNetwork();
+    console.log("Network:", network);
 
     const contractInstance = new ethers.Contract(
       contractAddress,
       contractabi,
       signer
     );
-  
+
     let candidates = await contractInstance.getAllVotesOfCandidates(proposalId);
 
     const tbody = document.getElementById("candidatesBody");
     tbody.innerHTML = "";
-    
+
     for (let i = 0; i < candidates.length; i++) {
       const row = document.createElement("tr");
 
@@ -550,13 +593,12 @@ const voteForCandidate = async (index) => {
       contractabi,
       signer
     );
-    
-    const amount = ethers.utils.parseUnits("1", 1);
-    const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, signer);
-    const approveTx = await tokenInstance.approve(contractAddress, amount);
-    await approveTx.wait();
 
-    const tx = await contractInstance.vote(proposalId, index, amount);
+    const tokenAmount = 1;
+    const tokenInstance = new ethers.Contract(tokenAddress, tokenAbi, signer);
+    const approveTx = await tokenInstance.approve(contractAddress, tokenAmount);
+    await approveTx.wait();
+    const tx = await contractInstance.vote(proposalId, index, tokenAmount);
     await tx.wait();
     document.getElementById("cand").innerText = "⏳ Đang gửi vote...";
 
@@ -566,7 +608,157 @@ const voteForCandidate = async (index) => {
     await loadCandidates(); // Cập nhật lại bảng sau khi vote
   } catch (err) {
     console.error(err);
-    document.getElementById("cand").innerText =
-      "Vote thất bại ";
+    document.getElementById("cand").innerText = "Vote thất bại ";
   }
 };
+
+let students = [];
+
+function renderStudents() {
+  const tbody = document.querySelector("#studentsTable tbody");
+  tbody.innerHTML = "";
+  students.forEach((s) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${s.fullName}</td>
+      <td>${s.studentId}</td>
+      <td>${s.email}</td>
+      <td>${s.wallet}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function showStudentsTable() {
+  document.getElementById("studentsTable").classList.remove("hidden");
+}
+
+function importExcel() {
+  const fileInput = document.getElementById("excelFile");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    document.getElementById("importStatus").innerText =
+      "❌ Vui lòng chọn file Excel";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function (e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+    // Chuẩn hóa dữ liệu gửi server
+    const importedStudents = jsonData.map((row, index) => ({
+      fullName: row.fullName?.trim(),
+      studentId: row.studentId?.toString().trim(),
+      email: row.email?.trim(),
+      walletAddress: row.walletAddress?.trim()
+    })).filter(s =>
+      s.fullName && s.studentId && s.email && s.walletAddress
+    );
+
+    if (importedStudents.length === 0) {
+      document.getElementById("importStatus").innerText =
+        "❌ File không có dữ liệu hợp lệ";
+      return;
+    }
+
+    // 🔥 GỬI LÊN SERVER
+    try {
+      document.getElementById("importStatus").innerText =
+        "⏳ Đang gửi dữ liệu lên server...";
+
+      const res = await fetch("/import-student", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ importedStudents })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message || "Import thất bại");
+      }
+
+      document.getElementById("importStatus").innerText =
+        `✅ Import thành công ${result.count} students`;
+
+      if (result.students) {
+        students = result.students;
+        renderStudents();
+        showStudentsTable();
+      }
+
+    } catch (err) {
+      document.getElementById("importStatus").innerText =
+        "❌ Lỗi: " + err.message;
+    }
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+const loadVoters = async () => {
+  try {
+    const status = document.getElementById("voterStatus");
+    const table = document.getElementById("votersTable");
+    const tbody = table.querySelector("tbody");
+
+    status.innerText = "⏳ Đang tải danh sách voter...";
+    tbody.innerHTML = "";
+
+    if (!window.ethereum) {
+      alert("Vui lòng cài MetaMask");
+      return;
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+
+    const contract = new ethers.Contract(
+      contractAddress,
+      contractabi,
+      signer
+    );
+
+    // ⚠️ proposalId phải tồn tại
+    const [voters, candidates, amounts] =
+      await contract.getVoters(proposalId);
+
+    if (voters.length === 0) {
+      status.innerText = "Chưa có ai vote";
+      return;
+    }
+
+    voters.forEach((addr, i) => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${addr}</td>
+        <td>Candidate #${candidates[i]}</td>
+        <td>${ethers.utils.formatUnits(amounts[i], 18)}</td>
+      `;
+
+      tbody.appendChild(row);
+    });
+
+    table.classList.remove("hidden");
+    status.innerText = `✅ Tổng số voter: ${voters.length}`;
+  } catch (err) {
+    console.error(err);
+    document.getElementById("voterStatus").innerText =
+      "❌ Lỗi khi tải danh sách voter";
+  }
+};
+

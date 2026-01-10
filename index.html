@@ -21,8 +21,8 @@
   <body>
     <div class="navbar">
       <a href="index.html">🗳️ Vote</a>
-      <a href="ListVoters.html">📋 List Voters</a>
-      <button class="open-btn" onclick="openModal()">
+      <a href="ListVoters.html" id="admin" class="hidden">📋 Admin</a>
+      <button class="open-btn" id="verify-btn" onclick="openModal()">
         🎓 Xác minh sinh viên
       </button>
       <!-- <span class="title">⚡ Decentralized Voting DApp</span> -->
@@ -37,7 +37,7 @@
 
     <div class="container fadeIn">
       <div class="time_close">
-        Thời gian kết thúc bầu chọn: 
+        <p id="time"></p>
       </div>
       <span>🗳️ DANH SÁCH SẢN PHẨM PHẦN MỀM</span>
       <table id="candidatesTable">
@@ -52,13 +52,6 @@
         <tbody id="candidatesBody"></tbody>
       </table>
       <p id="cand"></p>
-    </div>
-
-    <div class="container fadeIn">
-      <span>📊 Voting Status</span>
-      <button onclick="voteStatus()">🔍 Check Voting Status</button>
-      <p id="status"></p>
-      <p id="time"></p>
     </div>
 
     <div class="container fadeIn">
@@ -102,6 +95,7 @@
     <script>
       window.addEventListener("load", () => {
         loadCandidates();
+        voteStatus();
       });
 
       function openModal() {
@@ -147,7 +141,7 @@
           });
           console.log(result);
           
-
+          document.getElementById("verify-btn").innerHTML = "Xác minh thành công!";
           // Thành công
           await Swal.fire({
             icon: "success",

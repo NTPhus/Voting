@@ -6,7 +6,7 @@ async function main() {
 
   // Deploy Token
   const Token = await hre.ethers.getContractFactory("VToken");
-  const token = await Token.deploy(1000000); // Tổng cung 1,000,000 token
+  const token = await Token.deploy(1000); // Tổng cung 1,000 token
   await token.deployed();
   console.log("✅ Token deployed to:", token.address);
 
