@@ -425,7 +425,7 @@ const getBalance = async () => {
     balance.innerHTML = balanceTx.toString();
   } else {
     var balance = document.getElementById("balance");
-    balance.innerHTML = "Please connect Metamask first";
+    balance.innerHTML = "Hãy kết nối với ví Metamask trước";
   }
 };
 
@@ -447,7 +447,7 @@ const transferToken = async () => {
     }
   } else {
     const transferStatus = document.getElementById("transferStatus");
-    transferStatus.innerHTML = "Please connect Metamask first";
+    transferStatus.innerHTML = "Hãy kết nối với ví Metamask trước";
   }
 };
 
@@ -742,12 +742,12 @@ const loadVoters = async () => {
 
     voters.forEach((addr, i) => {
       const row = document.createElement("tr");
-
+      console.log(ethers.utils.formatUnits(amounts[i]) * 10**18);
       row.innerHTML = `
         <td>${i + 1}</td>
         <td>${addr}</td>
-        <td>Candidate #${candidates[i]}</td>
-        <td>${ethers.utils.formatUnits(amounts[i], 18)}</td>
+        <td>#${candidates[i]}</td>
+        <td>${ethers.utils.formatUnits(amounts[i], 18) * 10**18}</td>
       `;
 
       tbody.appendChild(row);
