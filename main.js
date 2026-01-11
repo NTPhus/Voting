@@ -654,10 +654,14 @@ const voteForCandidate = async (index) => {
     document.getElementById(
       "cand"
     ).innerText = `Vote thành công cho Sản phẩm số #${Number(index) + 1}`;
+    document.getElementById("cand").style.color = "green";
+    document.getElementById("cand").style.fontWeight = "20px";
     await loadCandidates(); // Cập nhật lại bảng sau khi vote
   } catch (err) {
     console.error(err);
     document.getElementById("cand").innerText = "Vote thất bại ";
+    document.getElementById("cand").style.color = "red";
+    document.getElementById("cand").style.fontWeight = "20px";
   }
 };
 
