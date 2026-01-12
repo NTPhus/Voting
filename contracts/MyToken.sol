@@ -5,16 +5,16 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract VToken is ERC20, Ownable {
-    mapping(address => bool) public claimed; // Lưu danh sách ví đã nhận
+    mapping(uint256 => mapping(address => bool)) public claimed;; // Lưu danh sách ví đã nhận
 
     constructor(uint256 initialSupply) ERC20("Voting Token", "VTK") Ownable(msg.sender) {
         _mint(msg.sender, initialSupply); // Mint cho owner ban đầu
     }
 
     // Sinh viên tự claim token, mỗi ví chỉ 1 lần
-    function claimToken(uint256 amount) public {
-        require(!claimed[msg.sender], "You have already claimed your tokens");
-        claimed[msg.sender] = true;
+    function claimToken(uint256 proposalId, uint256 amount) public {
+        require(!claimed[proposalId][msg.sender], "Already claimed for this proposal");
+        claimed[proposalId][msg.sender] = true;
         _mint(msg.sender, amount);
     }
 

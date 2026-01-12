@@ -5,14 +5,21 @@ const owner = "0xD93c7fBF96f534bbE15C80c4677D57a6783b8F18";
 const proposalId = 1;
 //Hàm của ERC-20
 const tokenAbi = [
+  // ERC20 cơ bản
   "function balanceOf(address owner) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function transfer(address to, uint256 amount) returns (bool)",
   "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-  "function claimToken(uint256 amount)",
+
+  //  CLAIM THEO PROPOSAL
+  "function claimToken(uint256 proposalId, uint256 amount)",
+
+  //  OWNER
   "function mint(address to, uint256 amount)",
-  "function claimed(address user) view returns (bool)",
+
+  //  CHECK CLAIM THEO PROPOSAL
+  "function claimed(uint256 proposalId, address user) view returns (bool)",
 ];
 
 //ABI
@@ -534,6 +541,13 @@ async function verifyStudent(formData) {
     throw new Error(data.error || "Xác minh thất bại");
   }
 
+  const hasClaimed = await tokenContract.claimed(proposalId, WALLET_CONNECTED);
+
+  if (hasClaimed) {
+    alert("⚠️ Bạn đã claim token cho proposal này rồi");
+    return;
+  }
+
   claimToken(1);
 
   document.getElementById("verify-btn").innerHTML = "Xác minh thành công!";
@@ -550,17 +564,19 @@ const claimToken = async (amount) => {
     }
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
 
     const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
 
-    const tx = await tokenContract.claimToken(amount);
+    // ✅ GỌI ĐÚNG HÀM MỚI
+    const tx = await tokenContract.claimToken(proposalId, amount);
     await tx.wait();
 
-    alert("Nhận token thành công!\nTxHash: " + tx.hash);
+    alert("✅ Nhận token thành công!\nTxHash: " + tx.hash);
   } catch (err) {
     console.error(err);
-    alert("Claim token thất bại: " + err.message);
+    alert("❌ Claim token thất bại: " + (err.reason || err.message));
   }
 };
 
