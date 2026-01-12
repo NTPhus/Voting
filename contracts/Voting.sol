@@ -132,32 +132,52 @@ contract Voting {
         p.candidates.push(Candidate({name: _candidateName, voteCount: 0}));
     }
 
-    function getWinner(
+    function getWinners(
         uint256 _proposalId
     )
         public
         view
         validProposal(_proposalId)
         returns (
-            string memory winnerName,
-            uint256 winnerVoteCount,
-            uint256 winnerIndex
+            string[] memory names,
+            uint256 maxVotes,
+            uint256[] memory indexes
         )
     {
         Proposal storage p = proposals[_proposalId];
         require(p.candidates.length > 0, "No candidates");
 
-        uint256 maxVotes = 0;
-        uint256 index = 0;
-
+        // 1. Tìm maxVotes
+        maxVotes = 0;
         for (uint256 i = 0; i < p.candidates.length; i++) {
             if (p.candidates[i].voteCount > maxVotes) {
                 maxVotes = p.candidates[i].voteCount;
-                index = i;
             }
         }
 
-        return (p.candidates[index].name, p.candidates[index].voteCount, index);
+        // 2. Đếm số winner
+        uint256 count = 0;
+        for (uint256 i = 0; i < p.candidates.length; i++) {
+            if (p.candidates[i].voteCount == maxVotes) {
+                count++;
+            }
+        }
+
+        // 3. Gán kết quả
+        names = new string[](count);
+        indexes = new uint256[](count);
+
+        uint256 j = 0;
+        for (uint256 i = 0; i < p.candidates.length; i++) {
+            if (p.candidates[i].voteCount == maxVotes) {
+                names[j] = p.candidates[i].name;
+                indexes[j] = i;
+                j++;
+            }
+        }
+
+        // 👇 return rõ ràng
+        return (names, maxVotes, indexes);
     }
 
     function getVoters(

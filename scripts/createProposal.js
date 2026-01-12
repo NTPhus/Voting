@@ -4,7 +4,7 @@ async function main() {
   const [owner] = await hre.ethers.getSigners();
 
   const Voting = await hre.ethers.getContractFactory("Voting");
-  const voting = await Voting.attach("0x19405Fed3727736540e84c6aC634C97781299dD5"); 
+  const voting = await Voting.attach("0x6e4A87449C243e6c19F0CC09BA9F93a4Ab245A65"); 
 
   console.log("Creating new proposal...");
 

@@ -1,4 +1,12 @@
 quit
+quit()
+que
+exit()
+exit
+'0xD93c7fBF96f534bbE15C80c4677D57a6783b8F18'exit
+await voting.owner()
+const voting = await ethers.getContractAt("Voting", "0x19405Fed3727736540e84c6aC634C97781299dD5")
+quit
 exit
 exity
 que

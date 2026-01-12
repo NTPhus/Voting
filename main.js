@@ -1,6 +1,6 @@
 let WALLET_CONNECTED = "";
-let contractAddress = "0x6e4A87449C243e6c19F0CC09BA9F93a4Ab245A65";
-const tokenAddress = "0x4B4667a59c48797b3F5355a3a5e13936601dd587";
+let contractAddress = "0x8819B84dAa3C0117E695D43857Cd4357c743353d";
+const tokenAddress = "0x3CbEFf10945B0f7095927b39DfD1FE63De147DC2";
 const owner = "0xD93c7fBF96f534bbE15C80c4677D57a6783b8F18";
 const proposalId = 1;
 //Hàm của ERC-20
@@ -249,22 +249,22 @@ let contractabi = [
         type: "uint256",
       },
     ],
-    name: "getWinner",
+    name: "getWinners",
     outputs: [
       {
-        internalType: "string",
-        name: "winnerName",
-        type: "string",
+        internalType: "string[]",
+        name: "names",
+        type: "string[]",
       },
       {
         internalType: "uint256",
-        name: "winnerVoteCount",
+        name: "maxVotes",
         type: "uint256",
       },
       {
-        internalType: "uint256",
-        name: "winnerIndex",
-        type: "uint256",
+        internalType: "uint256[]",
+        name: "indexes",
+        type: "uint256[]",
       },
     ],
     stateMutability: "view",
@@ -384,15 +384,32 @@ let contractabi = [
 ];
 
 const connectMetamask = async () => {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  const signer = provider.getSigner();
-  WALLET_CONNECTED = await signer.getAddress();
-  var element = document.getElementById("metamasknotification");
-  element.innerHTML = "Metamask is connected " + WALLET_CONNECTED;
-  if (WALLET_CONNECTED == owner) {
-    const adminLink = document.getElementById("admin");
-    adminLink.classList.remove("hidden");
+  try {
+    if (!window.ethereum) {
+      Swal.fire("❌ Lỗi", "MetaMask chưa được cài", "error");
+      return;
+    }
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+
+    WALLET_CONNECTED = await signer.getAddress();
+
+    document.getElementById("metamasknotification").innerHTML =
+      "✅ Metamask connected: " + WALLET_CONNECTED;
+
+    // 👇 Hiện cột vote
+    document
+      .querySelectorAll(".vote-column")
+      .forEach((el) => el.classList.remove("hidden"));
+
+    // 👑 Nếu là owner thì hiện admin
+    if (WALLET_CONNECTED.toLowerCase() === owner.toLowerCase()) {
+      document.getElementById("admin").classList.remove("hidden");
+    }
+  } catch (err) {
+    console.error("Connect MetaMask error:", err);
   }
 };
 
@@ -593,19 +610,13 @@ const loadCandidates = async () => {
     }
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-
-    const network = await provider.getNetwork();
-    console.log("Network:", network);
-
-    const contractInstance = new ethers.Contract(
+    const contractRead = new ethers.Contract(
       contractAddress,
       contractabi,
-      signer
+      provider
     );
 
-    let candidates = await contractInstance.getAllVotesOfCandidates(proposalId);
+    const candidates = await contractRead.getAllVotesOfCandidates(proposalId);
 
     const tbody = document.getElementById("candidatesBody");
     tbody.innerHTML = "";
@@ -617,7 +628,9 @@ const loadCandidates = async () => {
         <td>${i + 1}</td>
         <td>${candidates[i].name}</td>
         <td>${candidates[i].voteCount}</td>
-        <td><button onclick="voteForCandidate(${i})">🗳️ Vote</button></td>
+        <td class="vote-column hidden">
+          <button onclick="voteForCandidate(${i})">🗳️ Vote</button>
+        </td>
       `;
 
       tbody.appendChild(row);
@@ -809,7 +822,7 @@ const loadVoters = async () => {
   }
 };
 
-async function getWinner() {
+async function getWinners() {
   try {
     const proposalId = 1;
 
@@ -825,26 +838,35 @@ async function getWinner() {
       provider
     );
 
-    const result = await contractRead.getWinner(proposalId);
+    // 👇 GỌI HÀM MỚI
+    const result = await contractRead.getWinners(proposalId);
 
-    const winnerName = result[0];
-    const winnerVoteCount = ethers.utils.formatUnits(result[1], 18);
-    const winnerIndex = result[2].toString();
+    const winnerNames = result[0]; // string[]
+    const maxVotes = result[1].toNumber(); // uint256
+    const winnerIndexes = result[2]; // uint256[]
 
-    // document.getElementById("winnerResult").innerHTML = `
-    //   🏆 <b>Ứng viên chiến thắng:</b> ${winnerName}<br/>
-    //   📊 Số phiếu: ${Number(winnerVoteCount) *10**18}<br/>
-    //   🔢 Vị trí: ${winnerIndex}
-    // `;
-
-    Swal.fire({
-      icon: "success",
-      title: "🏆 KẾT QUẢ BÌNH CHỌN",
-      html: `
-        <b>${winnerName}</b><br/>
-        Số phiếu: <b>${Number(winnerVoteCount) *10**18}</b>
-      `,
-    });
+    // 🔹 Nếu hòa
+    if (winnerIndexes.length > 1) {
+      Swal.fire({
+        icon: "info",
+        title: "⚖️ KẾT QUẢ HÒA",
+        html: `
+          <b>Các ứng viên có số phiếu cao nhất (${maxVotes} phiếu):</b><br/>
+          ${winnerNames.map((name) => `• ${name}`).join("<br/>")}
+        `,
+      });
+    }
+    // 🔹 Nếu có 1 người thắng
+    else {
+      Swal.fire({
+        icon: "success",
+        title: "🏆 KẾT QUẢ BÌNH CHỌN",
+        html: `
+          <b>${winnerNames[0]}</b><br/>
+          Số phiếu: <b>${maxVotes}</b>
+        `,
+      });
+    }
   } catch (err) {
     console.error("getWinner error:", err);
     Swal.fire("❌ Không thể lấy kết quả", err.reason || err.message, "error");
